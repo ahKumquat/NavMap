@@ -269,13 +269,11 @@ body {
   background-color: #d14836;
   background-image: -webkit-linear-gradient(top,#dd4b39,#d14836);
   background-image: linear-gradient(top,#dd4b39,#d14836);
-  color: #fff;
   border: 1px solid transparent;
   text-align: center;
   letter-spacing: .5px;
   transition: .2s ease-out;
   cursor: pointer;
-  border: none;
   border-radius: 2px;
   display: inline-block;
   height: 36px;

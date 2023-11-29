@@ -166,7 +166,7 @@ public class MapServer {
 
         /* Define map application redirect */
         get("/", (request, response) -> {
-            response.redirect("/map.html", 301);
+            response.redirect("map.html", 301);
             return true;
         });
     }

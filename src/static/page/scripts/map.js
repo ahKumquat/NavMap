@@ -16,7 +16,7 @@ $(function() {
     const $directionsText = $('#directions-text');
     const themeableElements = ['body', '.actions', '.card', '.search', '.ui-autocomplete',
                                 '.status', '.settings', '.clear', '.action-icon'];
-    var params = {
+    const params = {
         ullat: 37.88,
         ullon: -122.27625,
         lrlat: 37.83,
@@ -27,26 +27,26 @@ $(function() {
     const SAFE_WIDTH = 1120;
     const SAFE_HEIGHT = 800;
     // psueod-lock
-    var getInProgress = false;
-    var route_params = {};
-    var map;
-    var dest;
-    var tx = 0, ty = 0;
-    var rtx, rty;
-    var markers = [];
-    var host;
-    var ullon_bound, ullat_bound, lrlon_bound, lrlat_bound;
-    var img_w, img_h;
-    var constrain, theme;
+    let getInProgress = false;
+    let route_params = {};
+    let map;
+    let dest;
+    let tx = 0, ty = 0;
+    let rtx, rty;
+    let markers = [];
+    let host;
+    let ullon_bound, ullat_bound, lrlon_bound, lrlat_bound;
+    let img_w, img_h;
+    let constrain, theme;
 
     /* Starting hyper-parameters #machinelearning */
     const zoom_delta = 0.04;
     const base_move_delta = 0.03;
     const max_level = 7;
     const min_level = 2; // Level limits based on pulled data
-    var wdpp = 0.00004291534423828125; // Starting wdpp for level 3
-    var hdpp = 0.00003388335630702399; // Starting hdpp for level 3
-    var current_level = 0;
+    let wdpp = 0.00004291534423828125; // Starting wdpp for level 3
+    let hdpp = 0.00003388335630702399; // Starting hdpp for level 3
+    let current_level = 0;
 
     /* Set server URIs */
     if (document.location.hostname !== 'localhost') {
@@ -87,14 +87,14 @@ $(function() {
     }
 
     function removeMarkers() {
-        for (var i = 0; i < markers.length; i++) {
+        for (let i = 0; i < markers.length; i++) {
             markers[i].element.remove();
         }
         markers = [];
     }
 
     function updateMarkers() {
-        for (var i = 0; i < markers.length; i++) {
+        for (let i = 0; i < markers.length; i++) {
             const marker = markers[i];
             marker.tx = (marker.lon - params.ullon) * (1 / wdpp) - 7 - tx;
             marker.ty = - (marker.lat - params.ullat) * (1 / hdpp) - 7 - ty;
@@ -156,7 +156,7 @@ $(function() {
     function updateT() {
         map.style.transform = 'translateX(' + tx + 'px) translateY(' + ty + 'px)';
         dest.style.transform = 'translateX(' + (tx+rtx) + 'px) translateY(' + (ty+rty) + 'px)';
-        for (var i = 0; i < markers.length; i++) {
+        for (let i = 0; i < markers.length; i++) {
             const marker = markers[i];
             marker.element.css('transform', 'translateX(' + (tx+marker.tx) + 'px) translateY(' +
             (ty + marker.ty) + 'px)');
@@ -204,11 +204,11 @@ $(function() {
         // Account for aspect ratio
         const window_ratio = params.w / params.h;
         // Adjust the zoom amount based on current amount of zoom
-        var delta = direction * zoom_delta / (Math.pow(2, level));
+        let delta = direction * zoom_delta / (Math.pow(2, level));
         // Try several times .hse didn't zoom enough
         // Simulate a for loop using a closure
-        var i = 0;
-        var zoomCallback = function() {
+        let i = 0;
+        const zoomCallback = function () {
             updateT();
             if (!(i < 3 && starting_level === current_level)) {
                 params.lrlon = real_lrlon();
@@ -268,9 +268,9 @@ $(function() {
     /* only ran once */
     function loadCookies() {
         const allcookies = document.cookie.replace(/ /g, '').split(';');
-        var foundConstrain = false;
-        var foundTheme = false;
-        for (var i = 0; i < allcookies.length; i++) {
+        let foundConstrain = false;
+        let foundTheme = false;
+        for (let i = 0; i < allcookies.length; i++) {
             const kv = allcookies[i].split('=');
             if (kv[0] === 'constrain') {
                 constrain = (kv[1] === 'true');
@@ -335,7 +335,7 @@ $(function() {
                   data: { term: ui.item.value, full: true},
                   success: function(data) {
                       removeMarkers();
-                      for (var i = 0; i < data.length; i++) {
+                      for (let i = 0; i < data.length; i++) {
                           console.log(data[i]);
                           const ele = $('<img/>', {
                               id: data[i].id,
@@ -363,13 +363,13 @@ $(function() {
 
     /* Enables drag functionality */
     $body.on('mousedown', function(event) {
-      var startX = event.pageX;
-      var startY = event.pageY;
-      var tmpX = startX;
-      var tmpY = startY;
-      var moved = false;
+        const startX = event.pageX;
+        const startY = event.pageY;
+        let tmpX = startX;
+        let tmpY = startY;
+        let moved = false;
 
-      $body.on('mousemove', function(event) {
+        $body.on('mousemove', function(event) {
         const dx = event.pageX - tmpX;
         const dy = event.pageY - tmpY;
         tx += dx;
@@ -490,28 +490,29 @@ $(function() {
 
     /* Keyboard navigation callbacks */
     document.onkeydown = function(e) {
-        var delta = base_move_delta / (Math.pow(2, current_level));
-        switch (e.keyCode) {
-            case 37: //left
+        const delta = base_move_delta / (Math.pow(2, current_level));
+        switch (e.key) {
+            case "ArrowLeft": //left
                 shiftLeft(delta);
                 update();
                 break;
-            case 38: //up
+            case "ArrowUp": //up
                 shiftUp(delta);
                 update();
                 break;
-            case 39: //right
+            case "ArrowRight": //right
                 shiftRight(delta);
                 update();
                 break;
-            case 40: //down
+            case "ArrowDown": //down
                 shiftDown(delta);
                 update();
                 break;
-            case 189: //minus
+            case "-": //minus
                 zoomOut();
                 break;
-            case 187: //equals/plus
+            case "=": //equals/plus
+            case "+":
                 zoomIn();
                 break;
         }
