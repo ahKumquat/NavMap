@@ -35,7 +35,7 @@ public class MapServer {
      * Longitude == x-axis; latitude == y-axis.
      */
     public static final double ROOT_ULLAT = 37.892195547244356, ROOT_ULLON = -122.2998046875,
-            ROOT_LRLAT = 37.82280243352756, ROOT_LRLON = -122.2119140625;
+        ROOT_LRLAT = 37.82280243352756, ROOT_LRLON = -122.2119140625;
     /** Each tile is 256x256 pixels. */
     public static final int TILE_SIZE = 256;
     /** HTTP failed response. */
@@ -45,12 +45,12 @@ public class MapServer {
     /** Route stroke information: Cyan with half transparency. */
     public static final Color ROUTE_STROKE_COLOR = new Color(108, 181, 230, 200);
     /** The tile images are in the IMG_ROOT folder. */
-    private static final String IMG_ROOT = "../library-sp18/data/proj3_imgs/";
+    private static final String IMG_ROOT = "./library-sp18/data/proj3_imgs/";
     /**
      * The OSM XML file path. Downloaded from <a href="http://download.bbbike.org/osm/">here</a>
      * using custom region selection.
      **/
-    private static final String OSM_DB_PATH = "../library-sp18/data/berkeley-2018.osm.xml";
+    private static final String OSM_DB_PATH = "./library-sp18/data/berkeley-2018.osm.xml";
     /**
      * Each raster request to the server will have the following parameters
      * as keys in the params map accessible by,
@@ -108,7 +108,7 @@ public class MapServer {
          * the request handlers. */
         get("/raster", (req, res) -> {
             HashMap<String, Double> params =
-                    getRequestParams(req, REQUIRED_RASTER_REQUEST_PARAMS);
+                getRequestParams(req, REQUIRED_RASTER_REQUEST_PARAMS);
             /* The png image is written to the ByteArrayOutputStream */
             ByteArrayOutputStream os = new ByteArrayOutputStream();
             /* getMapRaster() does almost all the work for this API call */
@@ -130,9 +130,9 @@ public class MapServer {
         /* Define the routing endpoint for HTTP GET requests. */
         get("/route", (req, res) -> {
             HashMap<String, Double> params =
-                    getRequestParams(req, REQUIRED_ROUTE_REQUEST_PARAMS);
+                getRequestParams(req, REQUIRED_ROUTE_REQUEST_PARAMS);
             route = Router.shortestPath(graph, params.get("start_lon"), params.get("start_lat"),
-                    params.get("end_lon"), params.get("end_lat"));
+                params.get("end_lon"), params.get("end_lat"));
             String directions = getDirectionsText();
             Map<String, Object> routeParams = new HashMap<>();
             routeParams.put("routing_success", !route.isEmpty());
@@ -179,7 +179,7 @@ public class MapServer {
      * @return A populated map of input parameter to it's numerical value.
      */
     private static HashMap<String, Double> getRequestParams(
-            spark.Request req, String[] requiredParams) {
+        spark.Request req, String[] requiredParams) {
         Set<String> reqParams = req.queryParams();
         HashMap<String, Double> params = new HashMap<>();
         for (String param : requiredParams) {
@@ -209,13 +209,13 @@ public class MapServer {
         int numHorizTiles = renderGrid[0].length;
 
         BufferedImage img = new BufferedImage(numHorizTiles * MapServer.TILE_SIZE,
-                numVertTiles * MapServer.TILE_SIZE, BufferedImage.TYPE_INT_RGB);
+            numVertTiles * MapServer.TILE_SIZE, BufferedImage.TYPE_INT_RGB);
         Graphics graphic = img.getGraphics();
         int x = 0, y = 0;
 
-        for (int r = 0; r < numVertTiles; r += 1) {
+        for (String[] strings : renderGrid) {
             for (int c = 0; c < numHorizTiles; c += 1) {
-                graphic.drawImage(getImage(IMG_ROOT + renderGrid[r][c]), x, y, null);
+                graphic.drawImage(getImage(IMG_ROOT + strings[c]), x, y, null);
                 x += MapServer.TILE_SIZE;
                 if (x >= img.getWidth()) {
                     x = 0;
@@ -236,12 +236,12 @@ public class MapServer {
             Graphics2D g2d = (Graphics2D) graphic;
             g2d.setColor(MapServer.ROUTE_STROKE_COLOR);
             g2d.setStroke(new BasicStroke(MapServer.ROUTE_STROKE_WIDTH_PX,
-                    BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND));
+                BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND));
             route.stream().reduce((v, w) -> {
                 g2d.drawLine((int) ((graph.lon(v) - ullon) * (1 / wdpp)),
-                             (int) ((ullat - graph.lat(v)) * (1 / hdpp)),
-                             (int) ((graph.lon(w) - ullon) * (1 / wdpp)),
-                             (int) ((ullat - graph.lat(w)) * (1 / hdpp)));
+                    (int) ((ullat - graph.lat(v)) * (1 / hdpp)),
+                    (int) ((graph.lon(w) - ullon) * (1 / wdpp)),
+                    (int) ((ullat - graph.lat(w)) * (1 / hdpp)));
                 return w;
             });
         }
@@ -259,13 +259,11 @@ public class MapServer {
 
     private static BufferedImage getImage(String imgPath) {
         BufferedImage tileImg = null;
-        if (tileImg == null) {
-            try {
-                File in = new File(imgPath);
-                tileImg = ImageIO.read(in);
-            } catch (IOException | NullPointerException e) {
-                e.printStackTrace();
-            }
+        try {
+            File in = new File(imgPath);
+            tileImg = ImageIO.read(in);
+        } catch (IOException | NullPointerException e) {
+            e.printStackTrace();
         }
         return tileImg;
     }
@@ -274,7 +272,7 @@ public class MapServer {
      * Clear the current found route, if it exists.
      */
     public static void clearRoute() {
-        route = new LinkedList<Long>();
+        route = new LinkedList<>();
     }
 
     /**
@@ -285,7 +283,7 @@ public class MapServer {
      * cleaned <code>prefix</code>.
      */
     public static List<String> getLocationsByPrefix(String prefix) {
-        return new LinkedList<>();
+        return graph.keysWithPrefix(prefix);
     }
 
     /**
@@ -301,7 +299,17 @@ public class MapServer {
      * "id" : Number, The id of the node. <br>
      */
     public static List<Map<String, Object>> getLocations(String locationName) {
-        return new LinkedList<>();
+        List<Map<String, Object>> result = new LinkedList<>();
+        List<Long> nodes = graph.getLocations(locationName);
+        for (long v : nodes) {
+            Map<String, Object> nodeInfo = new HashMap<>();
+            nodeInfo.put("lat", graph.locLat(v));
+            nodeInfo.put("lon", graph.locLon(v));
+            nodeInfo.put("name", locationName);
+            nodeInfo.put("id", v);
+            result.add(nodeInfo);
+        }
+        return result;
     }
 
     /**
@@ -332,7 +340,7 @@ public class MapServer {
     private static String getDirectionsText() {
         List<Router.NavigationDirection> directions = Router.routeDirections(graph, route);
         if (directions == null || directions.isEmpty()) {
-          return "";
+            return "";
         }
         StringBuilder sb = new StringBuilder();
         int step = 1;

@@ -15,7 +15,7 @@ public class TestDirections {
     private static final String PATHS_FILE = "path_results.txt";
     private static final String RESULTS_FILE = "directions_results.txt";
     private static final int NUM_TESTS = 8;
-    private static final String OSM_DB_PATH = "../library-sp18/data/berkeley-2018.osm.xml";
+    private static final String OSM_DB_PATH = "./library-sp18/data/berkeley-2018.osm.xml";
     private static GraphDB graph;
 
     @Before
@@ -29,7 +29,7 @@ public class TestDirections {
         List<List<Router.NavigationDirection>> expectedResults = resultsFromFile();
 
         for (int i = 0; i < NUM_TESTS; i++) {
-            System.out.println(String.format("Running test: %d", i));
+            System.out.printf("Running test: %d%n", i);
             List<Long> path = paths.get(i);
             List<Router.NavigationDirection> actual = Router.routeDirections(graph, path);
             List<Router.NavigationDirection> expected = expectedResults.get(i);
@@ -37,6 +37,7 @@ public class TestDirections {
             for (int j = 0; j < actual.size(); j++) {
                 Router.NavigationDirection actualDir = actual.get(j);
                 Router.NavigationDirection expectedDir = expected.get(j);
+                System.out.println(expectedDir);
                 assertEquals("Directions did not match", expectedDir.toString(),
                         actualDir.toString());
             }
