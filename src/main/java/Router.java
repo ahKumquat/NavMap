@@ -83,6 +83,9 @@ public class Router {
      * route.
      */
     public static List<NavigationDirection> routeDirections(GraphDB g, List<Long> route) {
+        if (route.size() < 2) {
+            return null;
+        }
         List<NavigationDirection> result = new ArrayList<>();
         long startNode = route.get(0);
         double distance = 0;
@@ -90,11 +93,6 @@ public class Router {
         double prevBearing = g.bearing(route.get(0), route.get(1));
         int currentDirection = NavigationDirection.START;
         String currentWay = "";
-
-        if (route.size() < 2) {
-            return null;
-        }
-
         for (int i = 1; i < route.size(); i++) {
             long prevNode = route.get(i - 1);
             long currNode = route.get(i);

@@ -14,6 +14,7 @@ $(function() {
     const $loadingStatus = $('#status-loading');
     const $errorStatus = $('#status-error');
     const $directionsText = $('#directions-text');
+    const $routeStatusErr = $('#status-route-error')
     const themeableElements = ['body', '.actions', '.card', '.search', '.ui-autocomplete',
                                 '.status', '.settings', '.clear', '.action-icon'];
     const params = {
@@ -139,7 +140,7 @@ $(function() {
                         successCallback();
                     }
                 } else {
-                    $loadingstatus.hide();
+                    $loadingStatus.hide();
                 }
             },
             error: function() {
@@ -177,6 +178,7 @@ $(function() {
                 if (data.directions_success) {
                     $directionsText.html(data.directions);
                 } else {
+                    $routeStatusErr.show()
                     $directionsText.html('No routing directions to display.');
                 }
             },
@@ -290,6 +292,7 @@ $(function() {
         if (!foundTheme) {
             document.cookie = 'theme=default';
             theme = 'default';
+            console.log("Cannot find Theme")
         }
         const date = new Date();
         // Expire 7 days from now
@@ -315,6 +318,7 @@ $(function() {
     map = document.getElementById('map');
     dest = document.getElementById('dest');
     dest.style.visibility = 'hidden';
+    $routeStatusErr.hide()
     params.lrlon = real_lrlon();
     params.lrlat = real_lrlat();
     loadCookies();
@@ -409,6 +413,7 @@ $(function() {
             url: clear_route,
             success: function() {
                 dest.style.visibility = 'hidden';
+                $routeStatusErr.hide()
                 $directionsText.html('No routing directions to display.');
                 update();
             },
@@ -455,6 +460,8 @@ $(function() {
             route_params.start_lat = params.ullat - (event.pageY - offset.top) * hdpp;
             $routeStatus.show();
         }
+        $routeStatusErr.hide()
+
     });
 
     /* Enables scroll wheel zoom */
